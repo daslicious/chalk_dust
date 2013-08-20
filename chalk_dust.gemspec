@@ -36,6 +36,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = ">= 1.9.2"
 
   gem.add_dependency "activerecord", ">= 3.0.0"
+  gem.add_dependency "activerecord-import", ">= 0.3.0"
 
   gem.add_development_dependency "bundler"
   gem.add_development_dependency "rspec", "~> 2.3"

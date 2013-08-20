@@ -2,6 +2,7 @@ require 'simplecov'
 SimpleCov.start
 
 require 'active_record'
+require "activerecord-import"
 require 'chalk_dust'
 
 puts "Using ActiveRecord #{ActiveRecord::VERSION::STRING}"

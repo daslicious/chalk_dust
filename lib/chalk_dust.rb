@@ -30,17 +30,17 @@ module ChalkDust
 
   def self.subscribers_of(publisher, options = {})
     topic = options.fetch(:topic, blank_topic)
-    Connection.for_publisher(publisher, :topic => topic).map(&:subscriber)
+    Connection.includes(:subscriber).for_publisher(publisher, :topic => topic).map(&:subscriber)
   end
 
   def self.publishers_of(subscriber)
-    Connection.for_subscriber(subscriber).map(&:publisher)
+    Connection.includes(:publisher).for_subscriber(subscriber).map(&:publisher)
   end
-  
+
   def self.subscribed?(subscriber, options)
     publisher = options.fetch(:to)
     topic     = options.fetch(:topic, blank_topic)
-    subscribers_of(publisher, :topic => topic).include?(subscriber)
+    Connection.for_publisher(publisher, :topic => topic).exists?(:subscriber => subscriber) ? true : false
   end
 
   def self.self_subscribe(publisher_subscriber)
@@ -52,13 +52,17 @@ module ChalkDust
   def self.publish_event(performer, event, target, options = {})
     root_publisher = options.fetch(:root, target)
     topic          = options.fetch(:topic, blank_topic)
+
+    activity_items = []
     subscribers_of(root_publisher, :topic => topic).map do |subscriber|
-      ActivityItem.create(:performer => performer,
+      activity_items << ActivityItem.new(:performer => performer,
                           :event     => event,
                           :target    => target,
                           :owner     => subscriber,
                           :topic     => topic)
     end
+    ChalkDust::ActivityItem.import activity_items, :synchronize => activity_items
+    activity_items
   end
 
   def self.activity_feed_for(subscriber, options = {})
